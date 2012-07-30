@@ -21,7 +21,7 @@ import sys, os
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-#needs_sphinx = '1.0'
+needs_sphinx = '1.0' # for primary_domain
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
@@ -33,6 +33,7 @@ templates_path = ['_templates']
 # The suffix of source filenames.
 source_suffix = '.rst'
 
+primary_domain = "Python"
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
 
@@ -242,5 +243,9 @@ texinfo_documents = [
 #texinfo_show_urls = 'footnote'
 
 
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+# set intersphinx_mappings for references, etc
+intersphinx_mapping = {
+        "python": ('http://docs.python.org/', None),
+        "networkx": ('http://networkx.lanl.gov/', None),
+        "flasksqlalchemy": ('http://packages.python.org/Flask-SQLAlchemy/', None)}
+

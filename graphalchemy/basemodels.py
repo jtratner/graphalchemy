@@ -13,13 +13,14 @@ class BaseNode(object):
         :param color: node color
         :type color: unicode (10 characters)
 
+    Further, defines :py:attr:`attrs` - a :py:module:`__builtin__.frozenset` of attributes to store
+
     Also has relationship to BaseEdge via:
 
-        :attr:`in_edges` - edges where BaseNode is target
-        :attr:`out_edges` - edges where BaseNode is source
+        :py:attr:`in_edges` - edges where BaseNode is target
+        :py:attr:`out_edges` - edges where BaseNode is source
 
-    Does NOT define `__init__`"""
-    COLORLENGTH=10
+    """
     attrs = frozenset(["size", "label", "color"])
 
     @classmethod
@@ -47,14 +48,20 @@ class BaseNode(object):
         return self.in_edges + self.out_edges
 
     def iter_edge_targets(self, node=None):
-        """ *generator that returns tuples of (edge, other_node)
+        """ generator that iterates over edges of Node and produces
+        tuples of (edge, other_node), where `other_node` is the node
+        on the other side of the connected edge.
+
+        :param node: node to iterate edges over. (see below)
+        :type node: :py:class:`BaseNode` instance
 
         if node is passed, will use node for in_edges and out_edges,
             this (should?) let you specify a queried node and change the join
             attributes on it just for this query
 
-        Parameters:
-            :param node: an instance of a class deriving from BaseNode (optional)
+        :returns: generator producing tuples of (edge, other_node)
+        :rtype: generator
+
         """
 
         node = node or self
@@ -79,7 +86,7 @@ class BaseNode(object):
 class BaseEdge(object):
     """ABC edge representation for graphalchemy edges.
     Only source, target are required (or source_id, target_id required).
-    Has the following parameters:
+    The constructor can take in the following parameters:
 
        :param id: primary key
        :type id: int
@@ -92,6 +99,8 @@ class BaseEdge(object):
        :param color: color of edge
        :type color: unicode (10 characters)
 
+    Further, defines :py:attr:`attrs` - a :py:class:`__builtin__.frozenset` of attributes to store
+
     References to BaseNodes:
 
         :param source_id: foreignkey to BaseNode - REQUIRED!
@@ -99,17 +108,16 @@ class BaseEdge(object):
         :param target_id: foreignkey to TargetNode - REQUIRED!
         :type target_id: int
         :param source: - relationship/actual node that is the source of edge
-        :type source: :class:`BaseNode` or (`BaseNode`-equivalent type)
+        :type source: :py:class:`BaseNode` or (`BaseNode`-equivalent type)
         :param target: relationship/actual node that is target of edge
-        :type target: :class:`BaseNode` or (`BaseNode` equivalent type)
+        :type target: :py:class:`BaseNode` or (`BaseNode` equivalent type)
 
     `__getitem__`, `__setitem__`:
 
-        :meth:`__getitem__` returns id of source/target
-            (so can use *edge operator with networkx, w/o maintaining refs)
-        :meth:`__setitem__` must set with BaseNode instance OR with id
+        :py:meth:`__getitem__` returns id of source/target
+                 (so can use `*edge` operator with, for example, :ref:`networkx <networkx:overview>`, w/o maintaining refs)
+        :py:meth:`__setitem__` must set with BaseNode instance OR with id
 
-    Does NOT define `__init__`
     """
     COLORLENGTH = 10
     def __getitem__(self, n):
@@ -155,7 +163,7 @@ class BaseEdge(object):
     @classmethod
     def connect_nodes(cls, source=None, target=None, **kwargs):
         """ Connect source and target by creating an edge.
-        `kwargs` are passed to the `cls` constructor. 
+        `kwargs` are passed to the `cls` constructor.
         Only need to pass source, target or source_id, target_id """
         edge = cls(**kwargs)
         if source:

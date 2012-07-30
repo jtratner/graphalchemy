@@ -1,8 +1,9 @@
-from graphalchemy.models import (
+from graphalchemy.sqlmodels import (
         create_base_classes,
         sqlite_connect,
-        class_to_tablename
+        class_to_tablename,
         )
+# TODO: add flask-sqlalchemy tests
 from nose.tools import assert_equal, raises
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker

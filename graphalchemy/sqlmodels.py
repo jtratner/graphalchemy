@@ -4,15 +4,15 @@ Models:
     this module allows the creation of a few base classes to make it easier
     to work with SQLAlchemy in creating (directed/undirected) graphs and edges.
 
-NOTE: If you feel the need to typecheck, it may be better to use basemodel.BaseEdge and
-basemodel.BaseNode as types, since those will *always* be True for any
+NOTE: If you feel the need to typecheck, it may be better to use basemodels.BaseEdge and
+basemodels.BaseNode as types, since those will *always* be True for any
 class created here.
 """
 try:
     import sqlalchemy as sqla # Column, Integer, Unicode, Float, Boolean, ForeignKey
 except ImportError:
-    raise ImportError("Must have SQLAlchemy installed to use sqlmodels")
-from basemodel import BaseEdge, BaseNode
+    raise ImportError("Must have SQLAlchemy installed to use sqlmodelss")
+from basemodels import BaseEdge, BaseNode
 import sqlalchemy.ext.declarative as decl # declared_attr
 import sqlalchemy.orm as orm # relationship, backref
 # overwrite a few extensions to use flask-sqlalchemy's model
@@ -182,7 +182,7 @@ def create_flask_classes(
 
     >>> from flask import Flask
     >>> from flask.ext.sqlalchemy import SQLAlchemy
-    >>> from graphalchemy.sqlmodels import create_flask_classes
+    >>> from graphalchemy.sqlmodelss import create_flask_classes
     >>>
     >>> app = Flask(__name__)
     >>> app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'

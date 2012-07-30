@@ -1,9 +1,9 @@
-from graphalchemy import models
+from graphalchemy import sqlmodels
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 import os
-BaseNode, BaseEdge = models.create_base_classes("Node", "Edge")
+BaseNode, BaseEdge = sqlmodels.create_base_classes("Node", "Edge")
 
 Base = declarative_base()
 
