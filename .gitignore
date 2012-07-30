@@ -1,0 +1,18 @@
+# eggs and compiled python
+*.pyc
+*.pyo
+*.pyco
+*.egg
+*.egg-info
+
+# swap files
+*.swp
+
+# logs
+ipython_log.py
+pip-log.txt
+
+# Mac OSX
+.DS_Store
+
+\.ropeproject
