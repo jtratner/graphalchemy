@@ -5,6 +5,11 @@ etc. Uses MongoAlchemy.
 """
 
 from base_model import BaseNode, BaseEdge
+try:
+    import mongoalchemy
+except ImportError:
+    raise ImportError("Must have mongoalchemy installed to use mongomodels")
+
 from mongoalchemy.fields import ( 
         ObjectIDField, StringField, NumberField, BoolField,
         computed_field, ListField)

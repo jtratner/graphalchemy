@@ -1,15 +1,24 @@
 
 class BaseNode(object):
     """ABC-ish Node representation for SQLAlchemy nodes.
-    Provides the following parameters:
-        id - integer - primary key
-        size - integer
-        label - unicode
-        color - unicode (10)
+
+    Has the following attributes:
+
+        :param id: primary key
+        :type id: int (need not be specified)
+        :param size: size of node
+        :type size: int
+        :param label: label for the node
+        :type label: unicode
+        :param color: node color
+        :type color: unicode (10 characters)
+
     Also has relationship to BaseEdge via:
-        in_edges - edges where BaseNode is target
-        out_edges - edges where BaseNode is source
-    Does NOT define __init__"""
+
+        :attr:`in_edges` - edges where BaseNode is target
+        :attr:`out_edges` - edges where BaseNode is source
+
+    Does NOT define `__init__`"""
     COLORLENGTH=10
     attrs = frozenset(["size", "label", "color"])
 
@@ -55,6 +64,14 @@ class BaseNode(object):
 
         for edge in node.out_edges:
             yield edge, edge.target
+
+    @property
+    def neighbors(self):
+        """ returns a generator for the neighbors of the node,
+        uses iter_edge_targets to find neighbors """
+        for edge, node in self.iter_edge_targets():
+            yield node
+
     def __repr__(self):
         return "<{cls}({vals})>".format(cls=self.__class__.__name__,
                 vals=repr([(k,getattr(self,k,None)) for k in self.attrs]))
@@ -63,22 +80,36 @@ class BaseEdge(object):
     """ABC edge representation for graphalchemy edges.
     Only source, target are required (or source_id, target_id required).
     Has the following parameters:
-        id - integer, primary key
-        size - integer
-        label - unicode
-        weight - float
-        color - unicode(10)
-    Connections:
-        source_id - foreignkey to BaseNode - REQUIRED!
-        target_id - foreignkey to TargetNode - REQUIRED!
-        source - relationship/actual node that is the source of edge
-        target - relationship/actual node that is target of edge
-    __getitem__, __setitem__:
-        __getitem__ --> returns id of source/target
+
+       :param id: primary key
+       :type id: int
+       :param size: size of edge
+       :type size: float
+       :param label: label of edge (e.g. for display)
+       :type label: unicode
+       :param weight: the edge-weight
+       :type weight: float
+       :param color: color of edge
+       :type color: unicode (10 characters)
+
+    References to BaseNodes:
+
+        :param source_id: foreignkey to BaseNode - REQUIRED!
+        :type target_id: int
+        :param target_id: foreignkey to TargetNode - REQUIRED!
+        :type target_id: int
+        :param source: - relationship/actual node that is the source of edge
+        :type source: :class:`BaseNode` or (`BaseNode`-equivalent type)
+        :param target: relationship/actual node that is target of edge
+        :type target: :class:`BaseNode` or (`BaseNode` equivalent type)
+
+    `__getitem__`, `__setitem__`:
+
+        :meth:`__getitem__` returns id of source/target
             (so can use *edge operator with networkx, w/o maintaining refs)
-        __setitem__ --> must set with BaseNode instance (otherwise
-            ForeignKey could get *real messed up*)
-    Does NOT define __init__
+        :meth:`__setitem__` must set with BaseNode instance OR with id
+
+    Does NOT define `__init__`
     """
     COLORLENGTH = 10
     def __getitem__(self, n):
@@ -123,8 +154,10 @@ class BaseEdge(object):
 
     @classmethod
     def connect_nodes(cls, source=None, target=None, **kwargs):
-        """ Note, only need to pass source, target or source_id, target_id """
-        edge = cls.create(**kwargs)
+        """ Connect source and target by creating an edge.
+        `kwargs` are passed to the `cls` constructor. 
+        Only need to pass source, target or source_id, target_id """
+        edge = cls(**kwargs)
         if source:
             edge.source = source
         if target:
