@@ -20,3 +20,6 @@ pip-log.txt
 # sphinx build files
 _build
 /build
+
+coverage_html_report
+.coverage
