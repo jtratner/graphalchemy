@@ -16,3 +16,7 @@ pip-log.txt
 .DS_Store
 
 \.ropeproject
+
+# sphinx build files
+_build
+/build
