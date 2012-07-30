@@ -174,4 +174,6 @@ class BaseEdge(object):
     def __repr__(self):
         return "<{cls}({vals})>".format(cls=self.__class__.__name__,
                 vals=repr([(k,getattr(self,k,None)) for k in self.attrs]))
+    def __str__(self):
+        return "({src}, {tgt})".format(src=self.source_id, tgt=self.target_id)
 

@@ -1,23 +1,49 @@
+from sqlmodelutils import (
+        # DBObject, make_DBObject,
+        DBSetup, check_object_characteristics,
+        limit_tests_to, show_tables)
 from graphalchemy.sqlmodels import (
-        create_base_classes,
         sqlite_connect,
         class_to_tablename,
+        create_base_classes
         )
+from sqlalchemy.ext.declarative import declarative_base
 # TODO: add flask-sqlalchemy tests
 from nose.tools import assert_equal, raises
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
 from sqlalchemy.exc import (
         IntegrityError)
 import unittest
 import os
 
-from collections import namedtuple
-DBObject = namedtuple("DBObject", ["Node", "Edge", "Base", "engine", "Session", "session"])
-def make_DBObject(Node=None, Edge=None, Base=None, engine=None, Session=None, session=None):
-    """ convenience method for object creation """
-    return DBObject(Node, Edge, Base, engine, Session, session)
+@raises(ValueError)
+def test_sqlite_connect_error():
+    """ sqlite connect should raise a ValueError if the path doesn't exist """
+    path = "Iamreallyhappy.db"
+    while os.path.exists(path):
+        path = "a" + path
+    return sqlite_connect(path, None)
+
+@raises(ValueError)
+def test_sqlite_path_error():
+    """ sqlite connect should raise a ValueError if you pass it  "sqlite:///"-starting path """
+    path = "sqlite:////Iamreallyhappy.db"
+    return sqlite_connect(path, None)
+
+@raises(ValueError)
+def test_sqlite_path_exists_error():
+    """ sqlite_connect should raise a ValueError if passed a "sqlite:///"-starting path that exists """
+    path = "asdfasfasdf.db"
+    while os.path.exists(path):
+        path = "z" + path
+    with open(path, "wb") as f:
+        f.write("")
+    newpath = "sqlite:///" + path
+    try:
+        return sqlite_connect(newpath, None)
+    except:
+        raise
+    finally:
+        os.remove(path)
 
 def test_class_to_tablename1():
     """ class_to_tablename: lowercase remains lowercase"""
@@ -33,64 +59,9 @@ def test_class_to_tablename3():
     for klass, output in [("someDB", "some_d_b"), ("CCamelCCase", "c_camel_c_case"), ("ABCDEFG", "a_b_c_d_e_f_g")]:
         assert_equal(class_to_tablename(klass), output)
 
-BLANKDATABASE = "tests/testdatabase.db"
-PRESETDATABASE = "tests/testcompatibledb.db"
-class DBSetup(object):
-    @classmethod
-    def create_database(cls, dbpath,
-            baseclass=None,
-            NodeClass=None,
-            EdgeClass=None,
-            NodeTable=None,
-            EdgeTable=None,
-            NodeMixin=None,
-            EdgeMixin=None,
-            connect=sqlite_connect,
-            echo=True,
-            declarative_base=declarative_base,
-            sessionmaker=sessionmaker,
-            create_engine=create_engine):
-        """ sets up database, engine, connection.
-        and initializes database.
-        sets all items as attributes on class, but can also access dbobject
-        Returns DBObject (nodeclass, edgeclass, Base, engine, Session, session)
-        """
-        NodeClass = NodeClass or "Node"
-        EdgeClass = EdgeClass or "Edge"
+BLANKDATABASE = "testdatabase.db"
+PRESETDATABASE = "testcompatibledb.db"
 
-        BaseNode, BaseEdge = create_base_classes(
-                NodeClass=NodeClass,
-                EdgeClass=EdgeClass,
-                NodeTable=NodeTable,
-                EdgeTable=EdgeTable)
-
-        cls.Base = Base = baseclass or declarative_base()
-        node_bases = [Base, BaseNode]
-        edge_bases = [Base, BaseEdge]
-
-        if NodeMixin:
-            node_bases.append(NodeMixin)
-        if EdgeMixin:
-            edge_bases.append(EdgeMixin)
-
-        # dynamically create classes
-        cls.Node = Node = type("Node", tuple(node_bases), {})
-        cls.Edge = Edge = type("Edge", tuple(edge_bases), {})
-
-        cls.engine = engine = create_engine(dbpath)
-        # load tables
-        Base.metadata.bind = engine
-        Base.metadata.create_all()
-
-        cls.Session = Session = sessionmaker(bind=engine)
-        cls.session = session = Session()
-        return make_DBObject(Node=Node, Edge=Edge, engine=engine, Base=Base,
-                session=session, Session=Session)
-
-def check_object_characteristics(object, attributes):
-    assert object
-    for k,v in attributes.items():
-        assert_equal((k, getattr(object, k, None)), (k , v))
 
 class TestBasicTables(unittest.TestSuite, DBSetup):
     dbpath = os.path.abspath(BLANKDATABASE)
@@ -98,7 +69,7 @@ class TestBasicTables(unittest.TestSuite, DBSetup):
     @classmethod
     def setUpClass(cls):
         if os.path.exists(cls.dbpath):
-            os.path.remove(cls.dbpath)
+            os.remove(cls.dbpath)
         if not os.path.exists(cls.dbpath):
             # create the file
             with open(cls.dbpath, "wb") as f:
@@ -108,23 +79,7 @@ class TestBasicTables(unittest.TestSuite, DBSetup):
         cls.edge12_attrs = {}
         cls.edge21_attrs = {}
         cls.create_database(cls.sqlitedbpath)
-
-    def create_nodes(self, nodes):
-        return [self.Node(**kwargs) for kwargs in nodes]
-
-    def create_edges(self, edges):
-        return [self.Edge(**kwargs) for kwargs in edges]
-
-    def get_edge(self, id):
-        edge = self.session.query(self.Edge).get(id)
-        assert isinstance(edge, self.Edge), "query didn't create an instance of Edge class"
-        return edge
-
-    def get_node(self, id):
-        node = self.session.query(self.Node).get(id)
-        assert isinstance(node, self.Node), "query didn't create an instance of Node class"
-        return node
-
+    @show_tables
     def test1_create_nodes(self):
         """test creating and committing nodes """
         node1, node2 = self.create_nodes([dict(label=u"Node1", size=15,
@@ -141,11 +96,6 @@ class TestBasicTables(unittest.TestSuite, DBSetup):
                 label = u"Node2",
                 size = 1,
                 color = u"orange",))
-
-    def expire_and_create_session(self):
-        self.session.expire_all()
-        self.session.close()
-        self.session = self.Session()
 
     def test2_connect_nodes(self):
         """test creating a forward and reverse connection between nodes"""
@@ -231,8 +181,9 @@ class TestBasicTables(unittest.TestSuite, DBSetup):
     @classmethod
     def tearDownClass(cls):
         # this should delete the database
-        cls.Base.metadata.drop_all()
+        cls.delete_items()
         os.remove(cls.dbpath)
+
 
 class DummyClass(object):
     """ test class for creating objects with attributes """
@@ -251,6 +202,12 @@ class TestSpecialMethods(TestBasicTables):
                 f.write("")
         cls.create_database(cls.sqlitedbpath)
 
+    @classmethod
+    def tearDownClass(cls):
+        # this should delete the database
+        cls.Base.metadata.drop_all()
+        cls.delete_items()
+        os.remove(cls.dbpath)
     @raises(IntegrityError)
     def test_empty_edge_create_raises_error(self):
         """check that Edge.create fails without source/target"""
@@ -304,12 +261,38 @@ class TestSpecialMethods(TestBasicTables):
         assert_equal(edge.source, node1)
         assert_equal(edge.target, node3)
 
-    def __iter__(self):
-        # use iter to only run specific tests
-        tests = [self.test_empty_edge_create_raises_error,
-                self.test_empty_edge_raises_error,
-                self.test_edge_can_take_id,
-                self.test_edge_create_takes_id,
-                ]
-        for test in tests:
-            yield test
+    __iter__ = limit_tests_to(["test_empty_edge_create_raises_error",
+                "test_empty_edge_raises_error",
+                "test_edge_can_take_id",
+                "test_edge_create_takes_id",
+                ])
+
+class TestPassingBaseClass(TestSpecialMethods):
+    """ runs the same tests as BasicTables, but this time with a defined Base"""
+    @classmethod
+    def setUpClass(cls):
+        cls.tearDownClass()
+        Base = declarative_base()
+        Node, Edge = create_base_classes("Node", "Edge", Base=Base)
+        cls.Node = Node
+        cls.Edge = Edge
+        cls.Base = Base
+        if not os.path.exists(cls.dbpath):
+            with open(cls.dbpath, "wb") as f:
+                f.write("")
+        engine, session = sqlite_connect(cls.dbpath, cls.Base.metadata)
+        cls.engine = engine
+        cls.session = session
+        cls.Session = cls.session.__class__
+        cls.session = session
+    def test000_sqlite_connect(self):
+        node15 = self.Node()
+        self.session.add(node15)
+        self.session.commit()
+        self.engine = self.engine
+    @classmethod
+    def tearDownClass(cls):
+        # this should delete the database
+        cls.delete_items()
+        if os.path.exists(cls.dbpath):
+            os.remove(cls.dbpath)

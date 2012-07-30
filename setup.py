@@ -20,7 +20,10 @@ config = {
         "Topic :: Database :: Front-Ends",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        ]
+        ],
+    'extras_require':
+    {'mongo':["mongoalchemy>=0.12"],
+        },
 }
 
 setup(**config)

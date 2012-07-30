@@ -19,30 +19,44 @@ import sqlalchemy.orm as orm # relationship, backref
 import os
 
 def sqlite_connect(dbpath, metadata, create_engine=sqla.create_engine,
-        sessionmaker=orm.sessionmaker, echo=True):
+        sessionmaker=orm.sessionmaker, event=sqla.event, echo=True,
+        enforce_fk=True):
     """ return an sqllite connection to the given dbpath.
     Optional arguments default to sqlalchemy functions.
 
     Parameter:
 
-        :param dbpath: path (relative or absolute) to database (unicode/string)
-        :param metadata: something that supports create_all(engine) to create/load tables
-        :type metadata: should create tables with `create_all(engine)`
+        :param dbpath: path (relative or absolute) to database (unicode/string) NOT "sqlite://"
+        :param metadata: something that supports create_all() to create/load tables and has a bind attribute
+        :type metadata: should create tables with `create_all()`
         :type create_engine: function (dbpath) -> engine
         :param sessionmaker: (optional) must take `bind=engine`, return a class that can be called
                             to create a session
         :type sessionamker: function (bind=engine) --> Session
+        :param event: event creator for engine (from SQLAlchemy)
+        :param bool enforce_fk: set database to enforce foreign key relationships
+        :default enforce_fk: True
 
     Returns:
 
        :returns: (engine, session)
+
+       :raises: ValueError if passed a path that does not exist or a non-valid path.
+
     """
-    create_engine = create_engine or sqla.create_engine
-    sessionmaker = sessionmaker or orm.sessionmaker
+    if dbpath.startswith("sqlite://"):
+        raise ValueError("Must give path, not sqlite connection string")
+    if (not os.path.exists(dbpath)) or os.path.isdir(dbpath):
+        raise ValueError("Path does not exist or is directory: %s." % dbpath)
     dbpath = os.path.abspath(dbpath)
     engine = create_engine("sqlite:///" + dbpath, echo=echo)
-    metadata.create_all(engine)
-    session = (sessionmaker(bind=engine))()
+    def _fk_pragma_on_connect(dbapi_con, con_record):
+        dbapi_con.execute('pragma foreign_keys=on')
+    sqla.event.listen(engine, 'connect', _fk_pragma_on_connect)
+    metadata.bind = engine
+    metadata.create_all()
+    Session = sessionmaker(bind=engine)
+    session = Session()
     return engine, session
 
 def class_to_tablename(class_str):
