@@ -1,3 +1,6 @@
+"""
+Base classes for all the graphalchemy models.
+"""
 
 class BaseNode(object):
     """ABC-ish Node representation for SQLAlchemy nodes.

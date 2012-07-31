@@ -1,5 +1,6 @@
 Flask==0.9
 Flask-SQLAlchemy==0.16
+GraphAlchemy==0.1.0
 Jinja2==2.6
 MongoAlchemy==0.12.1
 Pygments==1.5
@@ -9,7 +10,6 @@ Werkzeug==0.8.3
 coverage==3.5.2
 distribute==0.6.27
 docutils==0.9.1
-graphalchemy>=0.1.0
 nose==1.1.2
 pep8==1.3.3
 pymongo==2.2.1

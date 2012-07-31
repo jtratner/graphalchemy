@@ -18,9 +18,7 @@ import sqlalchemy.orm as orm # relationship, backref
 # overwrite a few extensions to use flask-sqlalchemy's model
 import os
 
-def sqlite_connect(dbpath, metadata, create_engine=sqla.create_engine,
-        sessionmaker=orm.sessionmaker, event=sqla.event, echo=True,
-        enforce_fk=True):
+def sqlite_connect(dbpath, metadata, echo=True, enforce_fk=True, **kwargs):
     """ return an sqllite connection to the given dbpath.
     Optional arguments default to sqlalchemy functions.
 
@@ -44,15 +42,22 @@ def sqlite_connect(dbpath, metadata, create_engine=sqla.create_engine,
        :raises: ValueError if passed a path that does not exist or a non-valid path.
 
     """
+
+    create_engine = kwargs.get("create_engine") or sqla.create_engine
+    sessionmaker = kwargs.get("sessionmaker") or orm.sessionmaker
+    event = kwargs.get("event") or sqla.event
+
     if dbpath.startswith("sqlite://"):
         raise ValueError("Must give path, not sqlite connection string")
     if (not os.path.exists(dbpath)) or os.path.isdir(dbpath):
         raise ValueError("Path does not exist or is directory: %s." % dbpath)
     dbpath = os.path.abspath(dbpath)
     engine = create_engine("sqlite:///" + dbpath, echo=echo)
-    def _fk_pragma_on_connect(dbapi_con, con_record):
-        dbapi_con.execute('pragma foreign_keys=on')
-    sqla.event.listen(engine, 'connect', _fk_pragma_on_connect)
+    if enforce_fk:
+        def _fk_pragma_on_connect(dbapi_con, con_record):
+            """ set enforced foreignkey for sqlite """
+            dbapi_con.execute('pragma foreign_keys=on')
+        event.listen(engine, 'connect', _fk_pragma_on_connect)
     metadata.bind = engine
     metadata.create_all()
     Session = sessionmaker(bind=engine)
@@ -76,22 +81,8 @@ def class_to_tablename(class_str):
             re.sub(match, add_underscore, class_str)).lower()
 
 
-def create_base_classes(
-        NodeClass,
-        EdgeClass,
-        NodeTable = None,
-        EdgeTable = None,
-        declared_attr = decl.declared_attr,
-        Column = sqla.Column,
-        Integer = sqla.Integer,
-        Unicode = sqla.Unicode,
-        Float = sqla.Float,
-        Boolean = sqla.Boolean,
-        ForeignKey = sqla.ForeignKey,
-        relationship = orm.relationship,
-        backref = orm.backref,
-        Base = None
-        ):
+def create_base_classes( NodeClass, EdgeClass, NodeTable = None, EdgeTable =
+        None, Base = None, **kwargs):
     """ creates base classes (BaseEdge and BaseNode) for use as mixins for
     graph nodes and edges. ALL parameters must be strings convertible to
     unicode! Classes need to be subclassed/composited with a declarative_base
@@ -111,12 +102,21 @@ def create_base_classes(
     :rtype: (:class:`Node`, :class:`Edge`)
 
     NOTE: To overwrite the default inheritance, you can pass in any SQLAlchemy
-    classes used in creating the functions::
+    classes used in creating the functions as a keyword argument::
 
         declared_attr, Column, Unicode, Integer, Float, Boolean,
         relationship, backref, ForeignKey
 
             """
+    declared_attr = kwargs.get("declared_attr") or decl.declared_attr
+    Column = kwargs.get("Column") or sqla.Column
+    Integer = kwargs.get("Integer") or sqla.Integer
+    Unicode = kwargs.get("Unicode") or sqla.Unicode
+    Float = kwargs.get("Float") or sqla.Float
+    Boolean = kwargs.get("Boolean") or sqla.Boolean
+    ForeignKey = kwargs.get("ForeignKey") or sqla.ForeignKey
+    relationship = kwargs.get("relationship") or orm.relationship
+    backref = kwargs.get("backref") or orm.backref
     # store inputted locals if provided
     NodeTable = NodeTable or class_to_tablename(NodeClass)
     EdgeTable = EdgeTable or class_to_tablename(EdgeClass)

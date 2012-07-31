@@ -1,4 +1,4 @@
-.. py:currentmodule:: graphalchemy.basemodel
+.. py:currentmodule:: graphalchemy.basemodels
 
 ============
 Base Classes
@@ -7,8 +7,8 @@ Base Classes
 
 All Node and Edge classes are subclasses of :class:`BaseNode` and :class:`BaseEdge`.
 
-.. autoclass:: basemodels.BaseNode
+.. autoclass:: BaseNode
     :members:
 
-.. autoclass:: basemodels.BaseEdge
+.. autoclass:: BaseEdge
     :members:
