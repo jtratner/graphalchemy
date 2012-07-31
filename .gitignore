@@ -4,6 +4,7 @@
 *.pyco
 *.egg
 *.egg-info
+dist
 
 # swap files
 *.swp

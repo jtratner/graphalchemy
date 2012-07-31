@@ -25,6 +25,8 @@ represented in SQL with SQLAlchemy_
 Using this package
 ==================
 
+Documentation_ is available at http://graphalchemy.readthedocs.org
+
 It's very simple to use (and examples are to come). But for now the best thing to do is
 to go read the docs on SQLAlchemy_
 
@@ -85,3 +87,4 @@ it uses SQLAlchemy's `declarative base`_)
 .. _mongoalchemy : http://www.mongoalchemy.org/
 .. _gephi : http://gephi.org/
 .. _declarative base : http://docs.sqlalchemy.org/en/rel_0_7/orm/extensions/declarative.html
+.. _documentation : http://graphalchemy.readthedocs.org

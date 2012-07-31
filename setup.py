@@ -20,6 +20,11 @@ config = {
         "Topic :: Database :: Front-Ends",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
+        "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Topic :: Scientific/Engineering :: Information Analysis",
         ],
 }
 
