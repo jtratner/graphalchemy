@@ -5,7 +5,7 @@ Base Classes
 ============
 
 
-All Node and Edge classes are subclasses of :py:class:`BaseNode` and :py:class:`BaseEdge`.
+All Node and Edge classes are subclasses of :class:`BaseNode` and :class:`BaseEdge`.
 
 .. autoclass:: basemodels.BaseNode
     :members:

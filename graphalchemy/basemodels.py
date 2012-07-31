@@ -13,12 +13,12 @@ class BaseNode(object):
         :param color: node color
         :type color: unicode (10 characters)
 
-    Further, defines :py:attr:`attrs` - a :py:mod:`__builtin__.frozenset` of attributes to store
+    Further, defines :attr:`attrs` - a :mod:`__builtin__.frozenset` of attributes to store
 
     Also has relationship to BaseEdge via:
 
-        :py:attr:`in_edges` - edges where BaseNode is target
-        :py:attr:`out_edges` - edges where BaseNode is source
+        :attr:`in_edges` - edges where BaseNode is target
+        :attr:`out_edges` - edges where BaseNode is source
 
     """
     attrs = frozenset(["size", "label", "color"])
@@ -53,7 +53,7 @@ class BaseNode(object):
         on the other side of the connected edge.
 
         :param node: node to iterate edges over. (see below)
-        :type node: :py:class:`BaseNode` instance
+        :type node: :class:`BaseNode` instance
 
         if node is passed, will use node for in_edges and out_edges,
             this (should?) let you specify a queried node and change the join
@@ -99,7 +99,7 @@ class BaseEdge(object):
        :param color: color of edge
        :type color: unicode (10 characters)
 
-    Further, defines :py:attr:`attrs` - a :py:class:`__builtin__.frozenset` of attributes to store
+    Further, defines :attr:`attrs` - a :class:`__builtin__.frozenset` of attributes to store
 
     References to BaseNodes:
 
@@ -108,16 +108,16 @@ class BaseEdge(object):
         :param target_id: foreignkey to TargetNode - REQUIRED!
         :type target_id: int
         :param source: - relationship/actual node that is the source of edge
-        :type source: :py:class:`BaseNode` or (`BaseNode`-equivalent type)
+        :type source: :class:`BaseNode` or (`BaseNode`-equivalent type)
         :param target: relationship/actual node that is target of edge
-        :type target: :py:class:`BaseNode` or (`BaseNode` equivalent type)
+        :type target: :class:`BaseNode` or (`BaseNode` equivalent type)
 
     `__getitem__`, `__setitem__`:
 
-    * :py:meth:`__getitem__` returns id of source/target (so can use `*edge`
-      operator with, for example, :py:mod:`networkx`, w/o
+    * :meth:`__getitem__` returns id of source/target (so can use `*edge`
+      operator with, for example, :mod:`networkx`, w/o
       maintaining refs)
-    * :py:meth:`__setitem__` must set with BaseNode instance OR with id
+    * :meth:`__setitem__` must set with BaseNode instance OR with id
 
     """
     COLORLENGTH = 10
