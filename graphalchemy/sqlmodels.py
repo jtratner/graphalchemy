@@ -97,23 +97,25 @@ def create_base_classes(
     unicode! Classes need to be subclassed/composited with a declarative_base
     class
 
-        Parameters:
-            :param NodeTable: the table for node (unicode)
-            :param NodeClass: the class for node (unicode)
-            :param EdgeTable: the table for edge (unicode)
-            :param EdgeClass: the class for edge (unicode)
-            :param Base: (optional) if a Base is passed, it will be
-                        added to the class type for you, thereby requiring
-                        no subclassing on your part.
-            :type Base: SQLAlchemy declarative base
+    Parameters:
+        :param NodeTable: the table for node (unicode)
+        :param NodeClass: the class for node (unicode)
+        :param EdgeTable: the table for edge (unicode)
+        :param EdgeClass: the class for edge (unicode)
+        :param Base: (optional) if a Base is passed, it will be
+                    added to the class type for you, thereby requiring
+                    no subclassing on your part.
+        :type Base: SQLAlchemy declarative base
 
     :returns: tuple of Node, Edge classes
-    :rtype: (:py:class:`Node`, :py:class:`Edge`)
+    :rtype: (:class:`Node`, :class:`Edge`)
 
     NOTE: To overwrite the default inheritance, you can pass in any SQLAlchemy
-    classes used in creating the functions:
-        `declared_attr`, `Column`, `Unicode`, `Integer`, `Float`, `Boolean`,
-        `relationship`, `backref`, `ForeignKey`
+    classes used in creating the functions::
+
+        declared_attr, Column, Unicode, Integer, Float, Boolean,
+        relationship, backref, ForeignKey
+
             """
     # store inputted locals if provided
     NodeTable = NodeTable or class_to_tablename(NodeClass)
@@ -187,7 +189,7 @@ def create_flask_classes(
         EdgeTable = None,
         ):
     """ Convenience method for creating Node and Edge base classes for use with
-    :py:mod:`Flask-SQLAlchemy`. Has nearly the same signature as :py:meth:`create_base_classes`
+    :mod:`Flask-SQLAlchemy`. Has nearly the same signature as :meth:`create_base_classes`
     But does not take in any overriding methods. Only NodeClass and EdgeClass
     are required.
 
@@ -212,9 +214,9 @@ def create_flask_classes(
 
     >>> db.create_all()
 
-    Otherwise, the classes created by :py:meth:`create_flask_classes` and
-    :py:meth:`create_base_classes` are pretty much the same, except that
-    :py:mod:`Flask-SQLAlchemy` provides some additional features that can be accessed
+    Otherwise, the classes created by :meth:`create_flask_classes` and
+    :meth:`create_base_classes` are pretty much the same, except that
+    :mod:`Flask-SQLAlchemy` provides some additional features that can be accessed
     on the Models.
     """
 

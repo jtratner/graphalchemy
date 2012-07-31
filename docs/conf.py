@@ -33,7 +33,7 @@ templates_path = ['_templates']
 # The suffix of source filenames.
 source_suffix = '.rst'
 
-primary_domain = "Python"
+primary_domain = "py"
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
 
@@ -248,7 +248,7 @@ intersphinx_mapping = {
         "python": ('http://docs.python.org/', None),
         "networkx": ('http://networkx.lanl.gov/', None),
         "flasksqlalchemy": ('http://packages.python.org/Flask-SQLAlchemy/', None),
-        "flask": ('http://flask.pocoo.org/docs', None),
-        "pyramidcookbook":('http://docs.pylonsproject.org/projects/pyramid_cookbook/', None)}
+        "flask": ('http://flask.pocoo.org/docs', None),}
+        #"pyramidcookbook":('http://docs.pylonsproject.org/projects/pyramid_cookbook/', None)}
 
 
