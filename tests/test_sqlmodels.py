@@ -7,6 +7,7 @@ from graphalchemy.sqlmodels import (
         class_to_tablename,
         create_base_classes
         )
+from graphalchemy.basemodels import BaseNode, BaseEdge
 from sqlalchemy.ext.declarative import declarative_base
 # TODO: add flask-sqlalchemy tests
 from nose.tools import assert_equal, raises
@@ -62,6 +63,12 @@ def test_class_to_tablename3():
 BLANKDATABASE = "testdatabase.db"
 PRESETDATABASE = "testcompatibledb.db"
 
+
+class DummyClass(object):
+    """ test class for creating objects with attributes """
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
 class TestBasicTables(unittest.TestSuite, DBSetup):
     dbpath = os.path.abspath(BLANKDATABASE)
@@ -178,6 +185,70 @@ class TestBasicTables(unittest.TestSuite, DBSetup):
         check_object_characteristics(edge12, self.edge12_attrs)
         edge21 = node2.in_edges[0]
         check_object_characteristics(edge21, self.edge21_attrs)
+
+    @raises(IndexError)
+    def test14_set_index_error(self):
+        """ edges can only hold two nodes"""
+        anode = self.Node()
+        bnode = self.Node()
+        cnode = self.Node()
+        edge = self.Edge()
+        edge[0] = anode
+        edge[1] = bnode
+        edge[2] = cnode
+
+    @raises(IndexError)
+    def test15_get_index_error(self):
+        """ edges can only be asked for two nodes"""
+        anode = self.Node()
+        bnode = self.Node()
+        edge = self.Edge()
+        edge[0] = anode
+        edge[1] = bnode
+        print edge[2]
+
+    @raises(TypeError)
+    def test16_set_only_nodes(self):
+        """ only BaseNodes can be stored in edges """
+        edge = self.Edge()
+        edge[0] = 5
+        edge[1] = None
+    
+    def test44_created_nodes_and_edges(self):
+        """ nodes and edges can be created from objects with `create`"""
+        myobj = DummyClass()
+        myobj.label = u"Dummy Label"
+        myobj.size = 15.0
+        myobj.color = u"Green"
+        other = DummyClass()
+        other.label = u"YES!"
+        other.size = 22.0
+        other.color = u"Fuschia"
+        newnode = self.Node.create(myobj)
+        self.session.add(newnode)
+        self.session.commit()
+        assert all([myobj.label == u"Dummy Label",
+        myobj.size == 15.0,
+        myobj.color == u"Green"]), "object was mutated during `create`"
+        othernode = self.Node.create(other)
+        assert all([
+        other.label == u"YES!",
+        other.size == 22.0,
+        other.color == u"Fuschia"]), "object was mutated during `create`"
+        assert_equal((other.label, other.size, other.color), 
+                (othernode.label, othernode.size, othernode.color))
+        assert isinstance(othernode, BaseNode), "`create` didn't produce an instance of BaseNode (%r). Instead was: %r" % (BaseNode, othernode.__class__.mro())
+        assert isinstance(othernode, self.Node), "`create` didn't produce an instance of *Node*"
+        new_edge = self.Edge.create(other, source=newnode, target=othernode)
+        self.session.add(new_edge)
+        self.session.commit()
+        assert isinstance(new_edge, BaseEdge), "`create` didn't produce an instance of %r. Instead was: %r" % (BaseEdge, new_edge.__class__.mro())
+        assert isinstance(new_edge, self.Edge), "`create` didn't produce an instance of %r. Instead was %r" % (self.Node, new_edge.__class__.mro())
+        assert_equal(str(new_edge),"({src}, {tgt})".format(src=newnode.id, tgt=othernode.id))
+        assert str(othernode).startswith("<Node")
+
+
+
     @classmethod
     def tearDownClass(cls):
         # this should delete the database
@@ -185,11 +256,6 @@ class TestBasicTables(unittest.TestSuite, DBSetup):
         os.remove(cls.dbpath)
 
 
-class DummyClass(object):
-    """ test class for creating objects with attributes """
-    def __init__(self, **kwargs):
-        for k, v in kwargs.items():
-            setattr(self, k, v)
 
 class TestSpecialMethods(TestBasicTables):
     @classmethod
@@ -290,6 +356,60 @@ class TestPassingBaseClass(TestSpecialMethods):
         self.session.add(node15)
         self.session.commit()
         self.engine = self.engine
+    def test11_get_and_set(self):
+        """ edges should be able to be accessed with *edge and edge[0], edge[1] """
+        self.expire_and_create_session()
+        node1 = self.Node(label=u"I am node 1!")
+        node2 = self.Node(label=u"I am node 2!")
+        node3 = self.Node(label=u"I am node 3!")
+        node4 = self.Node()
+        node5 = self.Node()
+        edge1 = self.Edge.connect_nodes(source=node1, target=node2)
+        edge2 = self.Edge.connect_nodes(source=node3, target=node1)
+        edge3 = self.Edge.connect_nodes(source=node5, target=node1)
+        nodelist = [node1, node2, node3, node4, node5]
+        edgelist = [edge1, edge2, edge3]
+        self.session.add_all(nodelist)
+        self.session.add_all(edgelist)
+        self.session.commit()
+        def equal_id(id1, id2):
+            assert id1 == id2, "The ids weren't equal from __getitem__: %r != %r" % (id1, id2)
+        equal_id(edge1[0], node1.id)
+        equal_id(edge1[1], node2.id)
+        # test that the splat operator works as expected
+        assert_equal((lambda *args: args)(*edge2), (node3.id, node1.id))
+        edge4 = self.Edge()
+        edge4[0] = node4
+        edge4[1] = node5
+        self.session.add(edge4)
+        self.session.commit()
+        edgelist.append(edge4)
+        self.__class__.edge_ids = map(lambda x: x.id, edgelist)
+        self.__class__.node_ids = map(lambda x: x.id, nodelist)
+        # edge5 = self.Edge()
+        # # edge5[0:1] = (node4, node5)
+        # self.session.add(edge5)
+        # self.session.commit()
+        # node_ids = map(lambda x: x.id, nodelist)
+        # edge_ids = map(lambda x: x.id, edgelist)
+        # self.expire_and_create_session()
+        # node1 = self.session.query(self.Node).get(node_ids[0])
+    def test12_iteration_methods(self):
+        """ test that iter_edge_targets actually returns all connecting nodes and edges """
+        self.expire_and_create_session()
+        node1 = self.session.query(self.Node).get(self.node_ids[0])
+        edges, nodes = zip(*node1.iter_edge_targets())
+        edge_ids = self.edge_ids[0:3]
+        node_ids = [self.node_ids[1], self.node_ids[2], self.node_ids[4]]
+        assert_equal(set(x.id for x in edges), set(edge_ids))
+        assert_equal(set(x.id for x in nodes), set(node_ids))
+    def test13_node_neighbors(self):
+        """ nodes should return their neighbors when asked """
+        node1 = self.session.query(self.Node).get(self.node_ids[0])
+        assert_equal(set(x.id for x in node1.edges), set(self.edge_ids[0:3]))
+        assert_equal(set(node1.neighbors), set(map(lambda x: self.session.query(self.Node).get(x), 
+                                        [self.node_ids[1], self.node_ids[2], self.node_ids[4]])))
+
     @classmethod
     def tearDownClass(cls):
         # this should delete the database
