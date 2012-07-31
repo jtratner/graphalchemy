@@ -142,6 +142,11 @@ class BaseEdge(object):
             raise IndexError("Node assignment out of range. Only has source, target node. '%d' is out of range" % n)
     attrs = frozenset(["size", "label", "weight", "directed",
         "source_id", "target_id", "source", "target"])
+
+    def __len__(self):
+        """ the length is *always* 2"""
+        return 2
+
     @classmethod
     def create(cls, obj=None, attrs=None, id=None, **kwargs):
         """ creates an instance of class, given an object and the

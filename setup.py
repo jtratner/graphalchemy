@@ -9,21 +9,18 @@ config = {
     'url': 'jeffreytratner.com',
     'download_url': 'Where to download it.',
     'author_email': 'jeffrey.tratner@gmail.com',
-    'version': '0.1',
+    'version': '0.1.0',
     'install_requires': ['SQLAlchemy>=0.7','nose'],
     'packages': ['graphalchemy'],
     'scripts': [],
     'name': 'GraphAlchemy',
-    'license': 'MIT',
-    'long_description':open("README.txt").read(),
+    'license': 'MIT License',
+    'long_description':open("README.rst").read(),
     'classifiers': [
         "Topic :: Database :: Front-Ends",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         ],
-    'extras_require':
-    {'mongo':["mongoalchemy>=0.12"],
-        },
 }
 
 setup(**config)
