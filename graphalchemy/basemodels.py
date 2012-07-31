@@ -13,7 +13,7 @@ class BaseNode(object):
         :param color: node color
         :type color: unicode (10 characters)
 
-    Further, defines :py:attr:`attrs` - a :py:module:`__builtin__.frozenset` of attributes to store
+    Further, defines :py:attr:`attrs` - a :py:mod:`__builtin__.frozenset` of attributes to store
 
     Also has relationship to BaseEdge via:
 
@@ -114,9 +114,10 @@ class BaseEdge(object):
 
     `__getitem__`, `__setitem__`:
 
-        :py:meth:`__getitem__` returns id of source/target
-                 (so can use `*edge` operator with, for example, :ref:`networkx <networkx:overview>`, w/o maintaining refs)
-        :py:meth:`__setitem__` must set with BaseNode instance OR with id
+    * :py:meth:`__getitem__` returns id of source/target (so can use `*edge`
+      operator with, for example, :py:mod:`networkx`, w/o
+      maintaining refs)
+    * :py:meth:`__setitem__` must set with BaseNode instance OR with id
 
     """
     COLORLENGTH = 10

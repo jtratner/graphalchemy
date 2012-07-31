@@ -187,7 +187,7 @@ def create_flask_classes(
         EdgeTable = None,
         ):
     """ Convenience method for creating Node and Edge base classes for use with
-    :py:module:`Flask-SQLAlchemy`. Has nearly the same signature as :py:meth:`create_base_classes`
+    :py:mod:`Flask-SQLAlchemy`. Has nearly the same signature as :py:meth:`create_base_classes`
     But does not take in any overriding methods. Only NodeClass and EdgeClass
     are required.
 
@@ -214,7 +214,7 @@ def create_flask_classes(
 
     Otherwise, the classes created by :py:meth:`create_flask_classes` and
     :py:meth:`create_base_classes` are pretty much the same, except that
-    :py:module:`Flask-SQLAlchemy` provides some additional features that can be accessed
+    :py:mod:`Flask-SQLAlchemy` provides some additional features that can be accessed
     on the Models.
     """
 

@@ -247,5 +247,8 @@ texinfo_documents = [
 intersphinx_mapping = {
         "python": ('http://docs.python.org/', None),
         "networkx": ('http://networkx.lanl.gov/', None),
-        "flasksqlalchemy": ('http://packages.python.org/Flask-SQLAlchemy/', None)}
+        "flasksqlalchemy": ('http://packages.python.org/Flask-SQLAlchemy/', None),
+        "flask": ('http://flask.pocoo.org/docs', None),
+        "pyramidcookbook":('http://docs.pylonsproject.org/projects/pyramid_cookbook/', None)}
+
 

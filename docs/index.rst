@@ -15,6 +15,7 @@ Contents:
 
    basemodel
    sqlbases
+   usingframeworks
 
 
 Indices and tables
