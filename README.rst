@@ -59,7 +59,7 @@ A very minimal example (using an SQLite database)::
 And you'd get a picture that looked something like this (clearly, we haven't added all the traits
 and such in, but you get the idea):
 
-.. image:: http://raw.github.com/jtratner/graphalchemy/master/docs/images/readme-example.png
+.. image:: https://github.com/jtratner/graphalchemy/raw/master/docs/images/readme-example.png
 
 Now, obviously this is a pretty minimal example, but it shows how you can take advantage
 of the power of SQL joins, queries, etc, but also very easily 
