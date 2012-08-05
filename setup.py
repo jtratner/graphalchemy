@@ -13,7 +13,7 @@ config = {
     'install_requires': ['SQLAlchemy>=0.7','nose'],
     'packages': ['graphalchemy'],
     'scripts': [],
-    'name': 'GraphAlchemy',
+    'name': 'graphalchemy',
     'license': 'MIT License',
     'long_description':open("README.rst").read(),
     'classifiers': [

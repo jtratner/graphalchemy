@@ -12,13 +12,14 @@ try:
     import sqlalchemy as sqla # Column, Integer, Unicode, Float, Boolean, ForeignKey
 except ImportError:
     raise ImportError("Must have SQLAlchemy installed to use sqlmodelss")
+import logging
 from basemodels import BaseEdge, BaseNode
 import sqlalchemy.ext.declarative as decl # declared_attr
 import sqlalchemy.orm as orm # relationship, backref
 # overwrite a few extensions to use flask-sqlalchemy's model
 import os
-
-def sqlite_connect(dbpath, metadata, echo=True, enforce_fk=True, **kwargs):
+logger = logging.getLogger("graphalchemy")
+def sqlite_connect(dbpath, metadata, echo=False, enforce_fk=True, **kwargs):
     """ return an sqllite connection to the given dbpath.
     Optional arguments default to sqlalchemy functions.
 
@@ -31,6 +32,7 @@ def sqlite_connect(dbpath, metadata, echo=True, enforce_fk=True, **kwargs):
         :param sessionmaker: (optional) must take `bind=engine`, return a class that can be called
                             to create a session
         :type sessionamker: function (bind=engine) --> Session
+        :param bool echo: set whether echo should be set (NOTE: should be *False* to avoid duplicate logging)
         :param event: event creator for engine (from SQLAlchemy)
         :param bool enforce_fk: set database to enforce foreign key relationships
         :default enforce_fk: True
@@ -49,15 +51,20 @@ def sqlite_connect(dbpath, metadata, echo=True, enforce_fk=True, **kwargs):
 
     if dbpath.startswith("sqlite://"):
         raise ValueError("Must give path, not sqlite connection string")
-    if (not os.path.exists(dbpath)) or os.path.isdir(dbpath):
+    # make in-memory database
+    elif dbpath and (not os.path.exists(dbpath)) or os.path.isdir(dbpath):
         raise ValueError("Path does not exist or is directory: %s." % dbpath)
-    dbpath = os.path.abspath(dbpath)
+    else:
+        logger.info("Using dbpath %r" % (dbpath or ":memory:"))
+    dbpath = dbpath and os.path.abspath(dbpath)
     engine = create_engine("sqlite:///" + dbpath, echo=echo)
     if enforce_fk:
         def _fk_pragma_on_connect(dbapi_con, con_record):
             """ set enforced foreignkey for sqlite """
             dbapi_con.execute('pragma foreign_keys=on')
         event.listen(engine, 'connect', _fk_pragma_on_connect)
+    else:
+        logger.info("NOT enforcing ForeignKeys")
     metadata.bind = engine
     metadata.create_all()
     Session = sessionmaker(bind=engine)
@@ -122,15 +129,13 @@ def create_base_classes( NodeClass, EdgeClass, NodeTable = None, EdgeTable =
     EdgeTable = EdgeTable or class_to_tablename(EdgeClass)
     fdict = dict(NodeClass=NodeClass, EdgeClass=EdgeClass)
 
-    class Node(BaseNode):
+    class _Node(BaseNode):
         """ SQLAlchemy declarative base for a Node representation
 
         Implements the BaseNode ABC:
 
         {BaseNode}""".format(BaseNode=BaseNode.__doc__)
-        @declared_attr
-        def __tablename__(cls):
-            return NodeTable
+        __tablename__ = NodeTable
         id = Column(Integer, primary_key=True) # gephi (req)
         size = Column(Integer) # gephi (optional)
         label = Column(Unicode) # gephi (optional)
@@ -138,7 +143,7 @@ def create_base_classes( NodeClass, EdgeClass, NodeTable = None, EdgeTable =
 
 
 
-    class Edge(BaseEdge):
+    class _Edge(BaseEdge):
         """ SQLAlchemy declarative base for edge representation.
 
         Implements the BaseEdgeABC:
@@ -177,9 +182,10 @@ def create_base_classes( NodeClass, EdgeClass, NodeTable = None, EdgeTable =
 
     # if given a base class then return a fully functional class
     if Base:
-        Node = type(NodeClass, (Node, Base), {})
-        Edge = type(EdgeClass, (Edge, Base), {})
-    return Node, Edge
+        Node = type(NodeClass, (_Node, Base), {})
+        Edge = type(EdgeClass, (_Edge, Base), {})
+        return Node, Edge
+    return _Node, _Edge
 
 def create_flask_classes(
         db,
@@ -198,7 +204,7 @@ def create_flask_classes(
 
     >>> from flask import Flask
     >>> from flask.ext.sqlalchemy import SQLAlchemy
-    >>> from graphalchemy.sqlmodelss import create_flask_classes
+    >>> from graphalchemy.sqlmodels import create_flask_classes
     >>>
     >>> app = Flask(__name__)
     >>> app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
@@ -225,7 +231,6 @@ def create_flask_classes(
         EdgeClass = EdgeClass,
         NodeTable = NodeTable,
         EdgeTable = EdgeTable,
-        declared_attr = db.declared_attr,
         Column = db.Column,
         Integer = db.Integer,
         Unicode = db.Unicode,
@@ -234,4 +239,4 @@ def create_flask_classes(
         ForeignKey = db.ForeignKey,
         relationship = db.relationship,
         backref = db.backref,
-        Base = db.Model)
+        )
