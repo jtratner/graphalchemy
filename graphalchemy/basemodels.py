@@ -13,8 +13,6 @@ class BaseNode(object):
         :type size: int
         :param label: label for the node
         :type label: unicode
-        :param color: node color
-        :type color: unicode (10 characters)
 
     Further, defines :attr:`attrs` - a :mod:`__builtin__.frozenset` of attributes to store
 
@@ -24,7 +22,7 @@ class BaseNode(object):
         :attr:`out_edges` - edges where BaseNode is source
 
     """
-    attrs = frozenset(["size", "label", "color"])
+    attrs = frozenset(("size", "label"))
 
     @classmethod
     def create(cls, obj=None, attrs=None, id=None, **kwargs):
@@ -91,16 +89,10 @@ class BaseEdge(object):
     Only source, target are required (or source_id, target_id required).
     The constructor can take in the following parameters:
 
-       :param id: primary key
-       :type id: int
-       :param size: size of edge
-       :type size: float
-       :param label: label of edge (e.g. for display)
-       :type label: unicode
-       :param weight: the edge-weight
-       :type weight: float
-       :param color: color of edge
-       :type color: unicode (10 characters)
+       :param int id: primary key
+       :param float size: size of edge
+       :param unicode label: label of edge (e.g. for display)
+       :param float weight: the edge-weight
 
     Further, defines :attr:`attrs` - a :class:`__builtin__.frozenset` of attributes to store
 
@@ -137,10 +129,8 @@ class BaseEdge(object):
             raise TypeError("Only instances of BaseNode can be set as source and target")
         if n in (0, -1):
             self.source = node
-            self.source_id = node.id
         elif n in (1, -2):
             self.target = node
-            self.target_id = node.id
         else:
             raise IndexError("Node assignment out of range. Only has source, target node. '%d' is out of range" % n)
     attrs = frozenset(["size", "label", "weight", "directed",

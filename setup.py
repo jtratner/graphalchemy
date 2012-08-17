@@ -6,14 +6,14 @@ except ImportError:
 config = {
     'description': 'Basic Node/Edge model for SQLAlchemy',
     'author': 'Jeffrey Tratner',
-    'url': 'jeffreytratner.com',
-    'download_url': 'Where to download it.',
+    # 'url': 'jeffreytratner.com',
+    # 'download_url': 'Where to download it.',
     'author_email': 'jeffrey.tratner@gmail.com',
-    'version': '0.1.0',
+    'version': '0.1.1-alpha',
     'install_requires': ['SQLAlchemy>=0.7','nose'],
     'packages': ['graphalchemy'],
     'scripts': [],
-    'name': 'graphalchemy',
+    'name': 'graph-alchemy',
     'license': 'MIT License',
     'long_description':open("README.rst").read(),
     'classifiers': [

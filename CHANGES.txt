@@ -2,4 +2,16 @@
 Changelog
 =========
 
+
+Version 0.1.x - very rough preview
+----------------------------------
+
+
+2012-08-17 - Jeffrey Tratner - v 0.1.1 -- fixed up sqlmodels queries
+
+* sqlmodels - renamed flask-sqlalchemy function for consistency
+* sqlmodels - removed color as a default attribute on all models.
+* sqlmodels - changed `in_edges` and `out_edges` to emit only one SQL
+statement (as opposed to previous 1 statement/node).
+
 v 0.1.0 -- initial version

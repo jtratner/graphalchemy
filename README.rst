@@ -8,6 +8,13 @@ GraphAlchemy
 Graph node-edge relationships in SQLAlchemy_ (and soon more orms) + networkx_
 integration.
 
+.. admonition:: Alpha package!
+
+    This package is in its very early days and the api and implementation is
+    going to change quite a bit. Suggestions and comments are welcome throughout.
+    No consistency guarantees until 1.x, but tagged releases are *guaranteed* to have
+    no changes in their api.
+
 The Goal
 ========
 

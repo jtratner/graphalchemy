@@ -1,12 +1,14 @@
 """
-Models:
+SQLAlchemyModels
+================
 
-    this module allows the creation of a few base classes to make it easier
-    to work with SQLAlchemy in creating (directed/undirected) graphs and edges.
+Allows the creation of a few base classes to make it
+easier to work with SQLAlchemy in creating (directed/undirected)
+graphs and edges.
 
-NOTE: If you feel the need to typecheck, it may be better to use basemodels.BaseEdge and
-basemodels.BaseNode as types, since those will *always* be True for any
-class created here.
+NOTE: If you feel the need to typecheck, it's better to use
+:class:`~.basemodels.BaseEdge` and :class:`~.basemodels.BaseNode` as types, since those will
+*always* be True for any class created here.
 """
 try:
     import sqlalchemy as sqla # Column, Integer, Unicode, Float, Boolean, ForeignKey
@@ -72,8 +74,8 @@ def sqlite_connect(dbpath, metadata, echo=False, enforce_fk=True, **kwargs):
     return engine, session
 
 def class_to_tablename(class_str):
-    """ converts `class_str` to a tablename, s.t.
-    CamelCase --> camel_case """
+    """ converts `class_str` to a tablename, s.t.  CamelCase -->
+    camel_case """
     def add_underscore(matchobj):
         match = matchobj.group(0)
         return match[0] + "_" + match[1]
@@ -139,7 +141,12 @@ def create_base_classes( NodeClass, EdgeClass, NodeTable = None, EdgeTable =
         id = Column(Integer, primary_key=True) # gephi (req)
         size = Column(Integer) # gephi (optional)
         label = Column(Unicode) # gephi (optional)
-        color = Column(Unicode(10))
+        @property
+        def in_edges(self):
+            return self._in_edges.all()
+        @property
+        def out_edges(self):
+            return self._out_edges.all()
 
 
 
@@ -148,7 +155,9 @@ def create_base_classes( NodeClass, EdgeClass, NodeTable = None, EdgeTable =
 
         Implements the BaseEdgeABC:
 
-        {BaseEdge}""".format(BaseEdge=BaseEdge.__doc__)
+        {BaseEdge}
+
+        """.format(BaseEdge=BaseEdge.__doc__)
         @declared_attr
         def __tablename__(self):
             return EdgeTable
@@ -157,7 +166,6 @@ def create_base_classes( NodeClass, EdgeClass, NodeTable = None, EdgeTable =
         size = Column(Integer) # gephi (optional)
         label = Column(Unicode) # gephi (optional)
         weight = Column(Float) # gephi (optional)
-        color = Column(Unicode(10))
         directed = Column(Boolean) # choices are 0, 1
 
         @declared_attr
@@ -172,13 +180,13 @@ def create_base_classes( NodeClass, EdgeClass, NodeTable = None, EdgeTable =
         def source(self):
             return relationship(NodeClass,
                     primaryjoin="{NodeClass}.id == {EdgeClass}.source_id".format(**fdict), uselist=False,
-                    backref=backref("out_edges"))
+                    backref=backref("_out_edges", lazy="dynamic"))
 
         @declared_attr
         def target(self):
             return relationship(NodeClass,
                 primaryjoin="{NodeClass}.id == {EdgeClass}.target_id".format(**fdict), uselist=False,
-                backref=backref("in_edges"))
+                backref=backref("_in_edges", lazy="dynamic"))
 
     # if given a base class then return a fully functional class
     if Base:
@@ -187,7 +195,7 @@ def create_base_classes( NodeClass, EdgeClass, NodeTable = None, EdgeTable =
         return Node, Edge
     return _Node, _Edge
 
-def create_flask_classes(
+def create_flask_base_classes(
         db,
         NodeClass,
         EdgeClass,

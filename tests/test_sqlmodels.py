@@ -89,20 +89,19 @@ class TestBasicTables(unittest.TestSuite, DBSetup):
     @show_tables
     def test1_create_nodes(self):
         """test creating and committing nodes """
-        node1, node2 = self.create_nodes([dict(label=u"Node1", size=15,
-            color=u"blue"), dict(label=u"Node2", size=1, color=u"orange")])
+        node1, node2 = self.create_nodes([dict(label=u"Node1", size=15,), dict(label=u"Node2", size=1)])
         self.session.add_all([node1, node2])
         self.session.commit()
         self.node1_attrs.update(dict(
                 id = node1.id,
                 label = u"Node1",
                 size = 15,
-                color = u"blue",))
+                ))
         self.node2_attrs.update(dict(
                 id = node2.id,
                 label = u"Node2",
                 size = 1,
-                color = u"orange",))
+                ))
 
     def test2_connect_nodes(self):
         """test creating a forward and reverse connection between nodes"""
@@ -219,24 +218,20 @@ class TestBasicTables(unittest.TestSuite, DBSetup):
         myobj = DummyClass()
         myobj.label = u"Dummy Label"
         myobj.size = 15.0
-        myobj.color = u"Green"
         other = DummyClass()
         other.label = u"YES!"
         other.size = 22.0
-        other.color = u"Fuschia"
         newnode = self.Node.create(myobj)
         self.session.add(newnode)
         self.session.commit()
         assert all([myobj.label == u"Dummy Label",
-        myobj.size == 15.0,
-        myobj.color == u"Green"]), "object was mutated during `create`"
+        myobj.size == 15.0,]), "object was mutated during `create`"
         othernode = self.Node.create(other)
         assert all([
         other.label == u"YES!",
-        other.size == 22.0,
-        other.color == u"Fuschia"]), "object was mutated during `create`"
-        assert_equal((other.label, other.size, other.color), 
-                (othernode.label, othernode.size, othernode.color))
+        other.size == 22.0,]), "object was mutated during `create`"
+        assert_equal((other.label, other.size), 
+                (othernode.label, othernode.size))
         assert isinstance(othernode, BaseNode), "`create` didn't produce an instance of BaseNode (%r). Instead was: %r" % (BaseNode, othernode.__class__.mro())
         assert isinstance(othernode, self.Node), "`create` didn't produce an instance of *Node*"
         new_edge = self.Edge.create(other, source=newnode, target=othernode)
