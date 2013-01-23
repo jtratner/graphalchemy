@@ -1,3 +1,12 @@
+This project was an experiment; one that I have to acknowledge did not really work.  
+It seemed like a good idea at first, but, quite frankly, 
+I'm not convinced that relational databases are the best
+way to represent graph data structures.  Further, trying to graft graph lookups
+on top of a framework like SQLAlchemy just led to more layers of indirection
+and made the whole enterprise very slow. If you are interested in a project or
+library like this, I encourage you to look at Neo.4j or some of the other Python
+libraries that try to implement efficient graph algorithms (there are quite a few of them!).
+
 ============
 GraphAlchemy
 ============
